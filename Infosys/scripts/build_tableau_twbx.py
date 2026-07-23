@@ -1,0 +1,228 @@
+import os
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DASHBOARD_DIR = ROOT / "dashboard"
+EXCEL_PATH = ROOT / "data" / "processed" / "hospital_final_dataset.xlsx"
+TWB_PATH = DASHBOARD_DIR / "medtrack_prototype.twb"
+TWBX_PATH = DASHBOARD_DIR / "medtrack_prototype.twbx"
+
+TWB_XML_CONTENT = """<?xml version='1.0' encoding='utf-8' ?>
+<workbook original-version='18.1' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <document-format-change-manifest>
+    <AutoCreateAndUpdateDPIAwareness />
+    <SheetIdentifierTracking />
+    <WindowsPersistSimpleIdentifiers />
+  </document-format-change-manifest>
+  <preferences>
+    <preference name='ui.encoding' value='UTF-8' />
+    <preference name='ui.theme' value='dark' />
+  </preferences>
+  <datasources>
+    <datasource caption='Final Dataset (hospital_final_dataset)' inline='true' name='excel-direct.hospital_final_dataset' version='18.1'>
+      <connection class='excel-direct' cleaning='no' compat='no' dataReflection='no' filename='Data/hospital_final_dataset.xlsx' password=''>
+        <relation name='Final Dataset' table='[Final Dataset$]' type='table'>
+          <columns gridOrigin='A1:AI1501:no:A1:AI1501:0' header='yes' outcome='2'>
+            <column name='admission_id' ordinal='0' datatype='string' />
+            <column name='patient_id' ordinal='1' datatype='string' />
+            <column name='hospital_id' ordinal='2' datatype='string' />
+            <column name='hospital_name' ordinal='3' datatype='string' />
+            <column name='region' ordinal='4' datatype='string' />
+            <column name='city' ordinal='5' datatype='string' />
+            <column name='department' ordinal='6' datatype='string' />
+            <column name='admission_date' ordinal='7' datatype='date' />
+            <column name='discharge_date' ordinal='8' datatype='date' />
+            <column name='admission_type' ordinal='9' datatype='string' />
+            <column name='discharge_status' ordinal='10' datatype='string' />
+            <column name='age' ordinal='11' datatype='integer' />
+            <column name='gender' ordinal='12' datatype='string' />
+            <column name='insurance_type' ordinal='13' datatype='string' />
+            <column name='total_beds' ordinal='14' datatype='integer' />
+            <column name='department_bed_capacity' ordinal='15' datatype='integer' />
+            <column name='occupied_beds' ordinal='16' datatype='integer' />
+            <column name='staff_available' ordinal='17' datatype='integer' />
+            <column name='staff_required' ordinal='18' datatype='integer' />
+            <column name='equipment_available' ordinal='19' datatype='integer' />
+            <column name='equipment_in_use' ordinal='20' datatype='integer' />
+            <column name='readmission_flag' ordinal='21' datatype='integer' />
+            <column name='length_of_stay_days' ordinal='22' datatype='integer' />
+            <column name='admission_month' ordinal='23' datatype='string' />
+            <column name='admission_year' ordinal='24' datatype='integer' />
+            <column name='admission_quarter' ordinal='25' datatype='string' />
+            <column name='bed_utilization_rate' ordinal='26' datatype='real' />
+            <column name='equipment_utilization_rate' ordinal='27' datatype='real' />
+            <column name='staff_coverage_rate' ordinal='28' datatype='real' />
+            <column name='is_readmission' ordinal='29' datatype='integer' />
+            <column name='total_admissions' ordinal='30' datatype='integer' />
+            <column name='occupancy_rate' ordinal='31' datatype='real' />
+            <column name='average_length_of_stay' ordinal='32' datatype='real' />
+            <column name='readmission_rate' ordinal='33' datatype='real' />
+            <column name='department_efficiency_score' ordinal='34' datatype='real' />
+          </columns>
+        </relation>
+      </connection>
+
+      <aliases enabled='yes' />
+
+      <column caption='Total Admissions' datatype='integer' name='[Calculation_Total_Admissions]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='COUNT([admission_id])' />
+      </column>
+      <column caption='Occupancy Rate (%)' datatype='real' name='[Calculation_Occupancy_Rate]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='SUM([occupied_beds]) / SUM([department_bed_capacity]) * 100' />
+      </column>
+      <column caption='Average Length of Stay' datatype='real' name='[Calculation_Avg_LOS]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='AVG([length_of_stay_days])' />
+      </column>
+      <column caption='Readmission Rate (%)' datatype='real' name='[Calculation_Readmission_Rate]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='SUM([is_readmission]) / COUNT([admission_id]) * 100' />
+      </column>
+      <column caption='Bed Utilization Rate (%)' datatype='real' name='[Calculation_Bed_Utilization]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='SUM([occupied_beds]) / SUM([department_bed_capacity]) * 100' />
+      </column>
+      <column caption='Equipment Utilization Rate (%)' datatype='real' name='[Calculation_Equip_Utilization]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='SUM([equipment_in_use]) / SUM([equipment_available]) * 100' />
+      </column>
+      <column caption='Staff Coverage Rate (%)' datatype='real' name='[Calculation_Staff_Coverage]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='SUM([staff_available]) / SUM([staff_required]) * 100' />
+      </column>
+      <column caption='Department Efficiency Score' datatype='real' name='[Calculation_Dept_Efficiency]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='0.40 * (100 - (SUM([is_readmission]) / COUNT([admission_id]) * 100)) + 0.30 * (SUM([occupied_beds]) / SUM([department_bed_capacity]) * 100) + 0.20 * (SUM([equipment_in_use]) / SUM([equipment_available]) * 100) + 0.10 * MIN((SUM([staff_available]) / SUM([staff_required]) * 100), 100)' />
+      </column>
+      <column caption='Discharge Count' datatype='integer' name='[Calculation_Discharge_Count]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='COUNT([discharge_date])' />
+      </column>
+    </datasource>
+  </datasources>
+
+  <worksheets>
+    <worksheet name='Hospital Overview KPI'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Final Dataset' name='excel-direct.hospital_final_dataset' />
+          </datasources>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='automatic' />
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name='Patient Flow Sheet'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Final Dataset' name='excel-direct.hospital_final_dataset' />
+          </datasources>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes><pane><view><breakdown value='auto' /></view><mark class='automatic' /></pane></panes>
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name='Department Analytics Sheet'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Final Dataset' name='excel-direct.hospital_final_dataset' />
+          </datasources>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes><pane><view><breakdown value='auto' /></view><mark class='automatic' /></pane></panes>
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name='Resource Utilization Sheet'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Final Dataset' name='excel-direct.hospital_final_dataset' />
+          </datasources>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes><pane><view><breakdown value='auto' /></view><mark class='automatic' /></pane></panes>
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+  </worksheets>
+
+  <dashboards>
+    <dashboard name='Hospital Overview'>
+      <style />
+      <size maxheight='768' maxwidth='1366' minheight='768' minwidth='1366' />
+      <zones>
+        <zone h='100000' id='1' type-static='layout-basic' w='100000' x='0' y='0'>
+          <zone h='98000' id='2' name='Hospital Overview KPI' w='98000' x='1000' y='1000' />
+        </zone>
+      </zones>
+    </dashboard>
+    <dashboard name='Patient Flow'>
+      <style />
+      <size maxheight='768' maxwidth='1366' minheight='768' minwidth='1366' />
+      <zones>
+        <zone h='100000' id='1' type-static='layout-basic' w='100000' x='0' y='0'>
+          <zone h='98000' id='2' name='Patient Flow Sheet' w='98000' x='1000' y='1000' />
+        </zone>
+      </zones>
+    </dashboard>
+    <dashboard name='Department Analytics'>
+      <style />
+      <size maxheight='768' maxwidth='1366' minheight='768' minwidth='1366' />
+      <zones>
+        <zone h='100000' id='1' type-static='layout-basic' w='100000' x='0' y='0'>
+          <zone h='98000' id='2' name='Department Analytics Sheet' w='98000' x='1000' y='1000' />
+        </zone>
+      </zones>
+    </dashboard>
+    <dashboard name='Resource Utilization'>
+      <style />
+      <size maxheight='768' maxwidth='1366' minheight='768' minwidth='1366' />
+      <zones>
+        <zone h='100000' id='1' type-static='layout-basic' w='100000' x='0' y='0'>
+          <zone h='98000' id='2' name='Resource Utilization Sheet' w='98000' x='1000' y='1000' />
+        </zone>
+      </zones>
+    </dashboard>
+  </dashboards>
+
+  <windows>
+    <window class='dashboard' name='Hospital Overview'>
+      <active pane-at-bigness='true' />
+    </window>
+  </windows>
+</workbook>
+"""
+
+def create_twbx():
+    DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # 1. Save .twb file
+    with open(TWB_PATH, "w", encoding="utf-8") as f:
+        f.write(TWB_XML_CONTENT)
+    print(f"Created {TWB_PATH}")
+    
+    # 2. Package into .twbx zip archive
+    with zipfile.ZipFile(TWBX_PATH, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.write(TWB_PATH, arcname="medtrack_prototype.twb")
+        if EXCEL_PATH.exists():
+            zipf.write(EXCEL_PATH, arcname="Data/hospital_final_dataset.xlsx")
+            
+    print(f"Created packaged Tableau workbook {TWBX_PATH}")
+
+if __name__ == "__main__":
+    create_twbx()
