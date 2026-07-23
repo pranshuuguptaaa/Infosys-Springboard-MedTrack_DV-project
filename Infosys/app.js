@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let appData = null;
   let chartInstances = {};
 
-  // Navigation tab switching
   const navItems = document.querySelectorAll(".nav-item");
   const tabPanels = document.querySelectorAll(".tab-panel");
 
@@ -18,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Top header button toggles
   const topBtns = document.querySelectorAll(".top-nav-btn");
   topBtns.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -27,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Fetch JSON data
   fetch("data/app_data.json")
     .then(res => res.json())
     .then(data => {
@@ -61,7 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
       topRegion.add(new Option(r, r));
     });
 
-    // Synchronize filters
     [sbHospital, topHospital].forEach(sel => sel.addEventListener("change", (e) => {
       sbHospital.value = e.target.value;
       topHospital.value = e.target.value;
@@ -93,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!appData) return;
     const filters = getSelectedFilters();
 
-    // Destroy previous charts
     Object.keys(chartInstances).forEach(key => {
       if (chartInstances[key]) chartInstances[key].destroy();
     });
@@ -106,36 +101,29 @@ document.addEventListener("DOMContentLoaded", () => {
     let filteredMonthly = appData.monthly;
     let filteredRegion = appData.region;
 
-    // Update KPI Card Numbers
     updateKPIValues(appData.summary);
 
-    // Row 1 Charts: Monthly Trends
     renderAdmissionsTrend(filteredMonthly);
     renderOccupancyTrend(filteredMonthly);
     renderReadmissionTrend(filteredMonthly);
 
-    // Row 2 Charts: Department & Type Breakdown
     renderPatientTypeChart(appData.admission_types);
     renderDeptAdmissionsChart(filteredDept);
     renderDeptLosChart(filteredDept);
     renderDeptReadmissionChart(filteredDept);
 
-    // Row 3 Charts: Region, Admissions vs Discharges, Bed Availability
     renderRegionAdmissionsChart(filteredRegion);
     renderAdmissionsVsDischargesChart(filteredMonthly);
     renderBedAvailabilityChart(filteredDept);
 
-    // Patient Flow Panel Charts
     renderFlowAdmissionType(appData.admission_types);
     renderFlowDischargeStatus(appData.discharge_statuses);
     renderFlowLosDist(appData.los_distribution);
 
-    // Department Analytics Panel Charts
     renderDeptEfficiencyScore(filteredDept);
     renderDeptCapacityComparison(filteredDept);
     renderDeptResources(filteredDept);
 
-    // Resource Table
     renderHospitalTable(appData.hospital, filters);
   }
 
@@ -147,8 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("kpi-bed-utilization").textContent = `${summary.bed_utilization_rate}%`;
     document.getElementById("kpi-discharge-count").textContent = summary.total_discharges.toLocaleString();
   }
-
-  // --- Chart Render Functions matching sample dashboard screenshot ---
 
   function renderAdmissionsTrend(monthlyData) {
     const ctx = document.getElementById("chart-admissions-trend").getContext("2d");
@@ -418,7 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Patient Flow & Dept Analytics Chart Helpers ---
   function renderFlowAdmissionType(types) {
     const ctx = document.getElementById("chart-flow-admission-type").getContext("2d");
     chartInstances["flowAdmissionType"] = new Chart(ctx, {
@@ -451,7 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
         labels: Object.keys(losDist).map(k => `${k} Day${k > 1 ? 's' : ''}`),
         datasets: [{ label: "Volume", data: Object.values(losDist), backgroundColor: "#38bdf8", borderRadius: 4 }]
       },
-      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: "#94a3b8" } }, y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#94a3b8" } } }, plugins: { legend: { display: false } } }
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, ticks: { color: "#94a3b8" } }, y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#94a3b8" } } }, plugins: { legend: { display: false } } }
     });
   }
 

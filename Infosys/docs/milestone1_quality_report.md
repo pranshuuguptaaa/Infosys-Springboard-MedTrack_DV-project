@@ -8,10 +8,6 @@
 - Cleaning script: `scripts/clean_hospital_data.py`
 - Cleaning notebook: `notebooks/hospital_cleaning.ipynb`
 
-## Source Notes
-
-The patient/admission structure is based on public synthetic healthcare data concepts from Synthea, an open-source synthetic patient population simulator. Synthetic data is used because real patient-level admission data is privacy-sensitive and usually unavailable for public portfolio projects.
-
 ## Quality Checks
 
 | Check | Result |

@@ -1,11 +1,5 @@
-"""Generate Module 3 hospital KPIs and the final Tableau-ready Excel dataset."""
-
-from __future__ import annotations
-
 from pathlib import Path
-
 import pandas as pd
-
 
 ROOT = Path(__file__).resolve().parents[1]
 CLEAN_PATH = ROOT / "data" / "processed" / "hospital_cleaned.csv"
@@ -13,15 +7,13 @@ FINAL_XLSX_PATH = ROOT / "data" / "processed" / "hospital_final_dataset.xlsx"
 FINAL_CSV_PATH = ROOT / "data" / "processed" / "hospital_final_dataset.csv"
 KPI_REPORT_PATH = ROOT / "docs" / "module3_kpi_report.md"
 
-
-def load_cleaned_data() -> pd.DataFrame:
+def load_cleaned_data():
     df = pd.read_csv(CLEAN_PATH)
     df["admission_date"] = pd.to_datetime(df["admission_date"])
     df["discharge_date"] = pd.to_datetime(df["discharge_date"])
     return df
 
-
-def add_row_level_kpis(df: pd.DataFrame) -> pd.DataFrame:
+def add_row_level_kpis(df):
     final = df.copy()
     final["total_admissions"] = 1
     final["occupancy_rate"] = (
@@ -42,15 +34,13 @@ def add_row_level_kpis(df: pd.DataFrame) -> pd.DataFrame:
     final["discharge_date"] = final["discharge_date"].dt.date.astype(str)
     return final
 
-
-def weighted_average(group: pd.DataFrame, value_column: str, weight_column: str) -> float:
+def weighted_average(group, value_column, weight_column):
     weights = group[weight_column].sum()
     if weights == 0:
         return 0.0
     return round((group[value_column] * group[weight_column]).sum() / weights, 2)
 
-
-def summarize(grouped: pd.core.groupby.DataFrameGroupBy, group_names: list[str]) -> pd.DataFrame:
+def summarize(grouped, group_names):
     rows = []
     for keys, group in grouped:
         if not isinstance(keys, tuple):
@@ -73,8 +63,7 @@ def summarize(grouped: pd.core.groupby.DataFrameGroupBy, group_names: list[str])
         rows.append(row)
     return pd.DataFrame(rows)
 
-
-def build_summary_tables(final: pd.DataFrame) -> dict[str, pd.DataFrame]:
+def build_summary_tables(final):
     hospital_summary = summarize(
         final.groupby(["hospital_id", "hospital_name", "region", "city"], dropna=False),
         ["hospital_id", "hospital_name", "region", "city"],
@@ -122,8 +111,7 @@ def build_summary_tables(final: pd.DataFrame) -> dict[str, pd.DataFrame]:
         "KPI Definitions": kpi_definitions(),
     }
 
-
-def kpi_definitions() -> pd.DataFrame:
+def kpi_definitions():
     return pd.DataFrame(
         [
             {
@@ -159,8 +147,7 @@ def kpi_definitions() -> pd.DataFrame:
         ]
     )
 
-
-def write_excel_workbook(tables: dict[str, pd.DataFrame]) -> None:
+def write_excel_workbook(tables):
     FINAL_XLSX_PATH.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(FINAL_XLSX_PATH, engine="openpyxl") as writer:
         for sheet_name, table in tables.items():
@@ -171,8 +158,7 @@ def write_excel_workbook(tables: dict[str, pd.DataFrame]) -> None:
                 max_length = max(len(str(cell.value or "")) for cell in column_cells)
                 worksheet.column_dimensions[column_cells[0].column_letter].width = min(max(max_length + 2, 12), 45)
 
-
-def write_report(tables: dict[str, pd.DataFrame]) -> None:
+def write_report(tables):
     overall = tables["Overall KPIs"].iloc[0]
     definitions = tables["KPI Definitions"]
     lines = [
@@ -216,8 +202,7 @@ def write_report(tables: dict[str, pd.DataFrame]) -> None:
     )
     KPI_REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
 
-
-def main() -> None:
+def main():
     cleaned = load_cleaned_data()
     final = add_row_level_kpis(cleaned)
     tables = build_summary_tables(final)
@@ -227,7 +212,6 @@ def main() -> None:
     print(f"Wrote {FINAL_XLSX_PATH}")
     print(f"Wrote {FINAL_CSV_PATH}")
     print(f"Wrote {KPI_REPORT_PATH}")
-
 
 if __name__ == "__main__":
     main()

@@ -1,11 +1,5 @@
-"""Clean the Milestone 1 hospital operations dataset."""
-
-from __future__ import annotations
-
 from pathlib import Path
-
 import pandas as pd
-
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW_PATH = ROOT / "data" / "raw" / "hospital_raw_data.csv"
@@ -28,12 +22,10 @@ DEPARTMENT_MAP = {
     "intensive care": "ICU",
 }
 
-
-def load_raw_data() -> pd.DataFrame:
+def load_raw_data():
     return pd.read_csv(RAW_PATH)
 
-
-def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+def clean_data(df):
     cleaned = df.copy()
     cleaned = cleaned.drop_duplicates(subset=["admission_id"], keep="first")
 
@@ -89,8 +81,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
     return cleaned.reset_index(drop=True)
 
-
-def quality_summary(raw: pd.DataFrame, cleaned: pd.DataFrame) -> dict[str, float | int]:
+def quality_summary(raw, cleaned):
     total_cells = cleaned.shape[0] * cleaned.shape[1]
     missing_cells = int(cleaned.isna().sum().sum())
     completeness = round((1 - missing_cells / total_cells) * 100, 2)
@@ -104,8 +95,7 @@ def quality_summary(raw: pd.DataFrame, cleaned: pd.DataFrame) -> dict[str, float
         "hospital_count": cleaned["hospital_id"].nunique(),
     }
 
-
-def write_quality_report(summary: dict[str, float | int]) -> None:
+def write_quality_report(summary):
     QUALITY_PATH.parent.mkdir(parents=True, exist_ok=True)
     text = f"""# Milestone 1 Quality Report
 
@@ -116,10 +106,6 @@ def write_quality_report(summary: dict[str, float | int]) -> None:
 - Collection script: `scripts/data_collection.py`
 - Cleaning script: `scripts/clean_hospital_data.py`
 - Cleaning notebook: `notebooks/hospital_cleaning.ipynb`
-
-## Source Notes
-
-The patient/admission structure is based on public synthetic healthcare data concepts from Synthea, an open-source synthetic patient population simulator. Synthetic data is used because real patient-level admission data is privacy-sensitive and usually unavailable for public portfolio projects.
 
 ## Quality Checks
 
@@ -142,8 +128,7 @@ The patient/admission structure is based on public synthetic healthcare data con
 """
     QUALITY_PATH.write_text(text, encoding="utf-8")
 
-
-def main() -> None:
+def main():
     raw = load_raw_data()
     cleaned = clean_data(raw)
     CLEAN_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -151,7 +136,6 @@ def main() -> None:
     summary = quality_summary(raw, cleaned)
     write_quality_report(summary)
     print(summary)
-
 
 if __name__ == "__main__":
     main()
