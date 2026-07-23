@@ -3,33 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MedTrack_DV - Hospital Operations & Tableau Prototype Dashboard</title>
+  <title>MedTrack DV - Hospital Operations & Patient Analytics Dashboard</title>
   <link rel="stylesheet" href="index.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-  <!-- Sidebar Navigation -->
+  <!-- Left Sidebar Navigation -->
   <aside class="sidebar">
     <div class="brand">
-      <div class="brand-icon">M</div>
+      <div class="brand-icon">🩺</div>
       <div class="brand-text">
-        <h1>MedTrack_DV</h1>
-        <span>Tableau Suite</span>
+        <h1>MedTrack DV</h1>
+        <span>Hospital Analytics</span>
       </div>
     </div>
 
+    <div class="nav-section-label">Dashboards</div>
     <ul class="nav-list">
       <li class="nav-item active" data-tab="overview">
         <span class="nav-icon">📊</span>
         <span>Hospital Overview</span>
       </li>
       <li class="nav-item" data-tab="patient-flow">
-        <span class="nav-icon">🏥</span>
+        <span class="nav-icon">👥</span>
         <span>Patient Flow</span>
       </li>
       <li class="nav-item" data-tab="department-analytics">
-        <span class="nav-icon">🩺</span>
+        <span class="nav-icon">🏥</span>
         <span>Department Analytics</span>
       </li>
       <li class="nav-item" data-tab="resource-utilization">
@@ -38,171 +39,289 @@
       </li>
     </ul>
 
+    <div class="sidebar-filter-block">
+      <div class="nav-section-label">Global Filters</div>
+
+      <div class="sidebar-filter-item">
+        <label for="sb-hospital">Hospital</label>
+        <select id="sb-hospital" class="sidebar-select">
+          <option value="ALL">All Hospitals</option>
+        </select>
+      </div>
+
+      <div class="sidebar-filter-item">
+        <label for="sb-department">Department</label>
+        <select id="sb-department" class="sidebar-select">
+          <option value="ALL">All Departments</option>
+        </select>
+      </div>
+
+      <div class="sidebar-filter-item">
+        <label for="sb-region">Region</label>
+        <select id="sb-region" class="sidebar-select">
+          <option value="ALL">All Regions</option>
+        </select>
+      </div>
+    </div>
+
     <div class="sidebar-footer">
       <p>Infosys Springboard Project</p>
-      <p>MedTrack_DV v1.0</p>
+      <p>MedTrack DV Suite</p>
     </div>
   </aside>
 
   <!-- Main Wrapper -->
   <div class="main-wrapper">
     
-    <!-- Top Filter & Title Bar -->
+    <!-- Top Header Bar -->
     <header class="top-bar">
-      <div class="header-title-row">
-        <div class="dashboard-title">
-          <h2 id="current-tab-title">Hospital Overview</h2>
-          <p class="dashboard-subtitle" id="current-tab-subtitle">Executive summary of hospital performance and admissions</p>
+      <div class="top-bar-left">
+        <div class="top-logo-badge">
+          <div class="top-logo-icon">🩺</div>
+          <span>MedTrack DV</span>
         </div>
-        <div class="badge-live">Tableau Dataset Loaded</div>
+
+        <!-- Top Filter Bar Chips -->
+        <div class="top-filters-row">
+          <div class="top-filter-chip">
+            <span>📅 Date Range:</span>
+            <select id="top-date-range">
+              <option value="2024">Jan 2024 - Dec 2024</option>
+              <option value="Q1">Q1 2024</option>
+              <option value="Q2">Q2 2024</option>
+              <option value="Q3">Q3 2024</option>
+              <option value="Q4">Q4 2024</option>
+            </select>
+          </div>
+
+          <div class="top-filter-chip">
+            <span>Hospital:</span>
+            <select id="top-filter-hospital">
+              <option value="ALL">All</option>
+            </select>
+          </div>
+
+          <div class="top-filter-chip">
+            <span>Department:</span>
+            <select id="top-filter-department">
+              <option value="ALL">All</option>
+            </select>
+          </div>
+
+          <div class="top-filter-chip">
+            <span>Region:</span>
+            <select id="top-filter-region">
+              <option value="ALL">All</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <!-- Global Filter Bar -->
-      <div class="filter-bar">
-        <div class="filter-group">
-          <label for="filter-hospital">Hospital</label>
-          <select id="filter-hospital" class="filter-select">
-            <option value="ALL">All Hospitals</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-department">Department</label>
-          <select id="filter-department" class="filter-select">
-            <option value="ALL">All Departments</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="filter-region">Region</label>
-          <select id="filter-region" class="filter-select">
-            <option value="ALL">All Regions</option>
-          </select>
-        </div>
-
-        <button id="btn-reset-filters" class="btn-reset">Reset Filters</button>
+      <!-- Right Nav Buttons -->
+      <div class="top-bar-right">
+        <button class="top-nav-btn active" id="btn-top-home">🏠 Home</button>
+        <button class="top-nav-btn" id="btn-top-dashboard">📊 Dashboard</button>
+        <button class="top-nav-btn" id="btn-top-about">ℹ️ About</button>
       </div>
     </header>
 
-    <!-- Main Container -->
+    <!-- Dashboard Main Container -->
     <main class="dashboard-container">
       
+      <!-- 6 Compact KPI Cards (Exact Layout from Screenshot) -->
+      <section class="kpi-row-six">
+        <!-- KPI 1: Total Admissions -->
+        <div class="kpi-card-compact">
+          <div class="kpi-top-header">
+            <span class="kpi-label">Total Admissions</span>
+            <div class="kpi-icon-badge teal">👥</div>
+          </div>
+          <div class="kpi-num-val" id="kpi-total-admissions">24,580</div>
+          <span class="kpi-trend-pill up">▲ 4.2% vs last year</span>
+        </div>
+
+        <!-- KPI 2: Occupancy Rate -->
+        <div class="kpi-card-compact">
+          <div class="kpi-top-header">
+            <span class="kpi-label">Occupancy Rate</span>
+            <div class="kpi-icon-badge blue">🛏️</div>
+          </div>
+          <div class="kpi-num-val" id="kpi-occupancy-rate">82.4%</div>
+          <span class="kpi-trend-pill up">▲ 1.8% vs target</span>
+        </div>
+
+        <!-- KPI 3: Average Length of Stay -->
+        <div class="kpi-card-compact">
+          <div class="kpi-top-header">
+            <span class="kpi-label">Avg Length of Stay</span>
+            <div class="kpi-icon-badge purple">⏱️</div>
+          </div>
+          <div class="kpi-num-val" id="kpi-avg-los">4.8 days</div>
+          <span class="kpi-trend-pill down">▼ 0.3 days</span>
+        </div>
+
+        <!-- KPI 4: Readmission Rate -->
+        <div class="kpi-card-compact">
+          <div class="kpi-top-header">
+            <span class="kpi-label">Readmission Rate</span>
+            <div class="kpi-icon-badge pink">🔄</div>
+          </div>
+          <div class="kpi-num-val" id="kpi-readmission-rate">7.2%</div>
+          <span class="kpi-trend-pill down">▼ 0.8% vs last month</span>
+        </div>
+
+        <!-- KPI 5: Bed Utilization Rate -->
+        <div class="kpi-card-compact">
+          <div class="kpi-top-header">
+            <span class="kpi-label">Bed Utilization Rate</span>
+            <div class="kpi-icon-badge cyan">📊</div>
+          </div>
+          <div class="kpi-num-val" id="kpi-bed-utilization">76.5%</div>
+          <span class="kpi-trend-pill up">▲ 2.1% vs target</span>
+        </div>
+
+        <!-- KPI 6: Discharge Count -->
+        <div class="kpi-card-compact">
+          <div class="kpi-top-header">
+            <span class="kpi-label">Discharge Count</span>
+            <div class="kpi-icon-badge green">✅</div>
+          </div>
+          <div class="kpi-num-val" id="kpi-discharge-count">23,613</div>
+          <span class="kpi-trend-pill up">▲ 3.9% vs last year</span>
+        </div>
+      </section>
+
       <!-- 1. Hospital Overview Panel -->
       <section id="panel-overview" class="tab-panel active">
-        <!-- KPI Cards Grid -->
-        <div class="kpi-grid">
-          <div class="kpi-card blue">
-            <span class="kpi-title">Total Admissions</span>
-            <span class="kpi-value" id="kpi-total-admissions">1,500</span>
-            <span class="kpi-subtext">Cleaned patient records</span>
+        
+        <!-- Row 1 Charts: 3 Monthly Trend Charts -->
+        <div class="grid-three-col">
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Admissions Trend (Monthly)</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-admissions-trend"></canvas>
+            </div>
           </div>
 
-          <div class="kpi-card teal">
-            <span class="kpi-title">Occupancy Rate</span>
-            <span class="kpi-value" id="kpi-occupancy-rate">78.4%</span>
-            <span class="kpi-subtext">Beds occupied / capacity</span>
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Occupancy Rate Trend (Monthly)</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-occupancy-trend"></canvas>
+            </div>
           </div>
 
-          <div class="kpi-card green">
-            <span class="kpi-title">Avg Length of Stay</span>
-            <span class="kpi-value" id="kpi-avg-los">5.2 days</span>
-            <span class="kpi-subtext">Average admission length</span>
-          </div>
-
-          <div class="kpi-card magenta">
-            <span class="kpi-title">Readmission Rate</span>
-            <span class="kpi-value" id="kpi-readmission-rate">14.8%</span>
-            <span class="kpi-subtext">30-day readmissions</span>
-          </div>
-
-          <div class="kpi-card yellow">
-            <span class="kpi-title">Efficiency Score</span>
-            <span class="kpi-value" id="kpi-efficiency-score">84.2</span>
-            <span class="kpi-subtext">Composite department KPI</span>
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Readmission Rate Trend (Monthly)</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-readmission-trend"></canvas>
+            </div>
           </div>
         </div>
 
-        <!-- Overview Charts Grid -->
-        <div class="charts-grid">
-          <div class="chart-card full-width">
-            <div class="chart-header">
-              <h3 class="chart-title">Monthly Admissions & Occupancy Trend</h3>
+        <!-- Row 2 Charts: 4 Department & Type Charts (Grid matching sample) -->
+        <div class="grid-four-col">
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Admissions by Patient Type</span>
             </div>
-            <div class="chart-body">
-              <canvas id="chart-monthly-trend"></canvas>
+            <div class="chart-canvas-container">
+              <canvas id="chart-patient-type"></canvas>
             </div>
           </div>
 
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">Admissions by Department</h3>
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Admissions by Department</span>
             </div>
-            <div class="chart-body">
+            <div class="chart-canvas-container">
               <canvas id="chart-dept-admissions"></canvas>
             </div>
           </div>
 
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">Admissions by Region</h3>
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Avg Length of Stay by Dept (Days)</span>
             </div>
-            <div class="chart-body">
-              <canvas id="chart-region-admissions"></canvas>
+            <div class="chart-canvas-container">
+              <canvas id="chart-dept-los"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Readmission Rate by Dept (%)</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-dept-readmissions"></canvas>
             </div>
           </div>
         </div>
+
+        <!-- Row 3 Charts: Region Map/Bar, Admissions vs Discharges, Emergency Mix -->
+        <div class="grid-three-col">
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Admissions by Region</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-region-admissions"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Monthly Admissions vs Discharges</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-admissions-vs-discharges"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Bed Availability by Occupancy Type</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-bed-availability"></canvas>
+            </div>
+          </div>
+        </div>
+
       </section>
 
       <!-- 2. Patient Flow Panel -->
       <section id="panel-patient-flow" class="tab-panel">
-        <div class="kpi-grid">
-          <div class="kpi-card blue">
-            <span class="kpi-title">Discharge Count</span>
-            <span class="kpi-value" id="kpi-discharge-count">1,500</span>
-            <span class="kpi-subtext">Total tracked discharges</span>
-          </div>
-          <div class="kpi-card green">
-            <span class="kpi-title">Peak Patient Month</span>
-            <span class="kpi-value" id="kpi-peak-month">Oct 2024</span>
-            <span class="kpi-subtext">Highest monthly volume</span>
-          </div>
-          <div class="kpi-card magenta">
-            <span class="kpi-title">Emergency Mix</span>
-            <span class="kpi-value" id="kpi-emergency-mix">34.2%</span>
-            <span class="kpi-subtext">Unplanned admissions</span>
-          </div>
-          <div class="kpi-card yellow">
-            <span class="kpi-title">Transferred / Other</span>
-            <span class="kpi-value" id="kpi-transferred">12.5%</span>
-            <span class="kpi-subtext">Discharge status mix</span>
-          </div>
-        </div>
-
-        <div class="charts-grid">
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">Admission Type Breakdown</h3>
+        <div class="grid-three-col">
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Admission Type Mix</span>
             </div>
-            <div class="chart-body">
-              <canvas id="chart-admission-type"></canvas>
+            <div class="chart-canvas-container tall">
+              <canvas id="chart-flow-admission-type"></canvas>
             </div>
           </div>
 
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">Discharge Status Distribution</h3>
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Discharge Status Breakdown</span>
             </div>
-            <div class="chart-body">
-              <canvas id="chart-discharge-status"></canvas>
+            <div class="chart-canvas-container tall">
+              <canvas id="chart-flow-discharge-status"></canvas>
             </div>
           </div>
 
-          <div class="chart-card full-width">
-            <div class="chart-header">
-              <h3 class="chart-title">Length of Stay (LOS) Distribution (Days)</h3>
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Length of Stay Distribution</span>
             </div>
-            <div class="chart-body">
-              <canvas id="chart-los-dist"></canvas>
+            <div class="chart-canvas-container tall">
+              <canvas id="chart-flow-los-dist"></canvas>
             </div>
           </div>
         </div>
@@ -210,31 +329,31 @@
 
       <!-- 3. Department Analytics Panel -->
       <section id="panel-department-analytics" class="tab-panel">
-        <div class="charts-grid">
-          <div class="chart-card full-width">
-            <div class="chart-header">
-              <h3 class="chart-title">Department Efficiency Score & Readmission Rate Comparison</h3>
+        <div class="grid-three-col">
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Department Efficiency Score</span>
             </div>
-            <div class="chart-body">
-              <canvas id="chart-dept-efficiency"></canvas>
-            </div>
-          </div>
-
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">Average Stay by Department (Days)</h3>
-            </div>
-            <div class="chart-body">
-              <canvas id="chart-dept-los"></canvas>
+            <div class="chart-canvas-container tall">
+              <canvas id="chart-dept-efficiency-score"></canvas>
             </div>
           </div>
 
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">Department Capacity vs Occupied Beds</h3>
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Treatment Capacity vs Occupied Beds</span>
             </div>
-            <div class="chart-body">
-              <canvas id="chart-dept-capacity"></canvas>
+            <div class="chart-canvas-container tall">
+              <canvas id="chart-dept-capacity-comparison"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-box-header">
+              <span class="chart-box-title">Staff Coverage vs Equipment Utilization</span>
+            </div>
+            <div class="chart-canvas-container tall">
+              <canvas id="chart-dept-resources"></canvas>
             </div>
           </div>
         </div>
@@ -242,48 +361,28 @@
 
       <!-- 4. Resource Utilization Panel -->
       <section id="panel-resource-utilization" class="tab-panel">
-        <div class="charts-grid">
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">Staff Coverage Rate (% Available vs Required)</h3>
-            </div>
-            <div class="chart-body">
-              <canvas id="chart-staff-coverage"></canvas>
-            </div>
+        <div class="chart-box">
+          <div class="chart-box-header">
+            <span class="chart-box-title">Hospital Ranking & Capacity Allocation</span>
           </div>
-
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">Equipment Utilization Rate by Department (%)</h3>
-            </div>
-            <div class="chart-body">
-              <canvas id="chart-equip-utilization"></canvas>
-            </div>
-          </div>
-
-          <div class="chart-card full-width">
-            <div class="chart-header">
-              <h3 class="chart-title">Hospital Bed Utilization & Ranking Summary</h3>
-            </div>
-            <div class="data-table-container">
-              <table class="data-table" id="table-hospital-summary">
-                <thead>
-                  <tr>
-                    <th>Hospital Name</th>
-                    <th>Region</th>
-                    <th>City</th>
-                    <th>Total Admissions</th>
-                    <th>Occupancy Rate</th>
-                    <th>Avg Stay (Days)</th>
-                    <th>Readmission Rate</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="table-hospital-body">
-                  <!-- Populated via JavaScript -->
-                </tbody>
-              </table>
-            </div>
+          <div class="table-wrapper">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Hospital Name</th>
+                  <th>Region</th>
+                  <th>City</th>
+                  <th>Admissions</th>
+                  <th>Occupancy Rate</th>
+                  <th>Avg Stay</th>
+                  <th>Readmission Rate</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-hospital-body">
+                <!-- Javascript populated -->
+              </tbody>
+            </table>
           </div>
         </div>
       </section>

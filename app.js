@@ -2,189 +2,253 @@ document.addEventListener("DOMContentLoaded", () => {
   let appData = null;
   let chartInstances = {};
 
-  // Tab switching logic
+  // Navigation tab switching
   const navItems = document.querySelectorAll(".nav-item");
   const tabPanels = document.querySelectorAll(".tab-panel");
-  const tabTitle = document.getElementById("current-tab-title");
-  const tabSubtitle = document.getElementById("current-tab-subtitle");
-
-  const tabMeta = {
-    overview: {
-      title: "Hospital Overview",
-      subtitle: "Executive summary of hospital performance, admissions, and regional distribution"
-    },
-    "patient-flow": {
-      title: "Patient Flow",
-      subtitle: "Patient movement, admission/discharge tracking, length of stay, and peak capacity load"
-    },
-    "department-analytics": {
-      title: "Department Analytics",
-      subtitle: "Department performance comparisons, readmission rates, and composite efficiency scores"
-    },
-    "resource-utilization": {
-      title: "Resource Utilization",
-      subtitle: "Bed utilization, staff allocation coverage, and equipment usage monitoring"
-    }
-  };
 
   navItems.forEach(item => {
     item.addEventListener("click", () => {
       const targetTab = item.getAttribute("data-tab");
-      
       navItems.forEach(nav => nav.classList.remove("active"));
       tabPanels.forEach(panel => panel.classList.remove("active"));
 
       item.classList.add("active");
       const activePanel = document.getElementById(`panel-${targetTab}`);
       if (activePanel) activePanel.classList.add("active");
-
-      if (tabMeta[targetTab]) {
-        tabTitle.textContent = tabMeta[targetTab].title;
-        tabSubtitle.textContent = tabMeta[targetTab].subtitle;
-      }
     });
   });
 
-  // Load JSON Data
+  // Top header button toggles
+  const topBtns = document.querySelectorAll(".top-nav-btn");
+  topBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      topBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
+  // Fetch JSON data
   fetch("data/app_data.json")
     .then(res => res.json())
     .then(data => {
       appData = data;
-      initFilters();
-      renderDashboard();
+      populateFilters();
+      renderAllDashboards();
     })
-    .catch(err => {
-      console.error("Error loading app_data.json:", err);
-    });
+    .catch(err => console.error("Error loading app_data.json:", err));
 
-  // Initialize filter dropdowns
-  function initFilters() {
-    const hospitalSelect = document.getElementById("filter-hospital");
-    const deptSelect = document.getElementById("filter-department");
-    const regionSelect = document.getElementById("filter-region");
+  function populateFilters() {
+    const sbHospital = document.getElementById("sb-hospital");
+    const sbDept = document.getElementById("sb-department");
+    const sbRegion = document.getElementById("sb-region");
+
+    const topHospital = document.getElementById("top-filter-hospital");
+    const topDept = document.getElementById("top-filter-department");
+    const topRegion = document.getElementById("top-filter-region");
 
     appData.hospitals_list.forEach(h => {
-      const opt = document.createElement("option");
-      opt.value = h;
-      opt.textContent = h;
-      hospitalSelect.appendChild(opt);
+      sbHospital.add(new Option(h, h));
+      topHospital.add(new Option(h, h));
     });
 
     appData.departments_list.forEach(d => {
-      const opt = document.createElement("option");
-      opt.value = d;
-      opt.textContent = d;
-      deptSelect.appendChild(opt);
+      sbDept.add(new Option(d, d));
+      topDept.add(new Option(d, d));
     });
 
     appData.regions_list.forEach(r => {
-      const opt = document.createElement("option");
-      opt.value = r;
-      opt.textContent = r;
-      regionSelect.appendChild(opt);
+      sbRegion.add(new Option(r, r));
+      topRegion.add(new Option(r, r));
     });
 
-    [hospitalSelect, deptSelect, regionSelect].forEach(select => {
-      select.addEventListener("change", renderDashboard);
-    });
+    // Synchronize filters
+    [sbHospital, topHospital].forEach(sel => sel.addEventListener("change", (e) => {
+      sbHospital.value = e.target.value;
+      topHospital.value = e.target.value;
+      renderAllDashboards();
+    }));
 
-    document.getElementById("btn-reset-filters").addEventListener("click", () => {
-      hospitalSelect.value = "ALL";
-      deptSelect.value = "ALL";
-      regionSelect.value = "ALL";
-      renderDashboard();
-    });
+    [sbDept, topDept].forEach(sel => sel.addEventListener("change", (e) => {
+      sbDept.value = e.target.value;
+      topDept.value = e.target.value;
+      renderAllDashboards();
+    }));
+
+    [sbRegion, topRegion].forEach(sel => sel.addEventListener("change", (e) => {
+      sbRegion.value = e.target.value;
+      topRegion.value = e.target.value;
+      renderAllDashboards();
+    }));
   }
 
-  function getFilterValues() {
+  function getSelectedFilters() {
     return {
-      hospital: document.getElementById("filter-hospital").value,
-      department: document.getElementById("filter-department").value,
-      region: document.getElementById("filter-region").value
+      hospital: document.getElementById("sb-hospital").value,
+      department: document.getElementById("sb-department").value,
+      region: document.getElementById("sb-region").value
     };
   }
 
-  function renderDashboard() {
+  function renderAllDashboards() {
     if (!appData) return;
-    const filters = getFilterValues();
+    const filters = getSelectedFilters();
 
-    // Filter department summary data
+    // Destroy previous charts
+    Object.keys(chartInstances).forEach(key => {
+      if (chartInstances[key]) chartInstances[key].destroy();
+    });
+
     let filteredDept = appData.department;
     if (filters.department !== "ALL") {
       filteredDept = filteredDept.filter(d => d.department === filters.department);
     }
 
-    // Filter monthly data
     let filteredMonthly = appData.monthly;
+    let filteredRegion = appData.region;
 
-    // Destroy existing charts to prevent canvas re-render issues
-    Object.keys(chartInstances).forEach(key => {
-      if (chartInstances[key]) chartInstances[key].destroy();
-    });
+    // Update KPI Card Numbers
+    updateKPIValues(appData.summary);
 
-    // Render Overview
-    renderMonthlyTrendChart(filteredMonthly);
+    // Row 1 Charts: Monthly Trends
+    renderAdmissionsTrend(filteredMonthly);
+    renderOccupancyTrend(filteredMonthly);
+    renderReadmissionTrend(filteredMonthly);
+
+    // Row 2 Charts: Department & Type Breakdown
+    renderPatientTypeChart(appData.admission_types);
     renderDeptAdmissionsChart(filteredDept);
-    renderRegionAdmissionsChart(appData.region);
-
-    // Render Patient Flow
-    renderAdmissionTypeChart(appData.admission_types);
-    renderDischargeStatusChart(appData.discharge_statuses);
-    renderLosDistChart(appData.los_distribution);
-
-    // Render Department Analytics
-    renderDeptEfficiencyChart(filteredDept);
     renderDeptLosChart(filteredDept);
-    renderDeptCapacityChart(filteredDept);
+    renderDeptReadmissionChart(filteredDept);
 
-    // Render Resource Utilization
-    renderStaffCoverageChart(filteredDept);
-    renderEquipUtilizationChart(filteredDept);
-    renderHospitalSummaryTable(appData.hospital, filters);
+    // Row 3 Charts: Region, Admissions vs Discharges, Bed Availability
+    renderRegionAdmissionsChart(filteredRegion);
+    renderAdmissionsVsDischargesChart(filteredMonthly);
+    renderBedAvailabilityChart(filteredDept);
+
+    // Patient Flow Panel Charts
+    renderFlowAdmissionType(appData.admission_types);
+    renderFlowDischargeStatus(appData.discharge_statuses);
+    renderFlowLosDist(appData.los_distribution);
+
+    // Department Analytics Panel Charts
+    renderDeptEfficiencyScore(filteredDept);
+    renderDeptCapacityComparison(filteredDept);
+    renderDeptResources(filteredDept);
+
+    // Resource Table
+    renderHospitalTable(appData.hospital, filters);
   }
 
-  // --- Chart Renderers ---
+  function updateKPIValues(summary) {
+    document.getElementById("kpi-total-admissions").textContent = summary.total_admissions.toLocaleString();
+    document.getElementById("kpi-occupancy-rate").textContent = `${summary.occupancy_rate}%`;
+    document.getElementById("kpi-avg-los").textContent = `${summary.avg_los} days`;
+    document.getElementById("kpi-readmission-rate").textContent = `${summary.readmission_rate}%`;
+    document.getElementById("kpi-bed-utilization").textContent = `${summary.bed_utilization_rate}%`;
+    document.getElementById("kpi-discharge-count").textContent = summary.total_discharges.toLocaleString();
+  }
 
-  function renderMonthlyTrendChart(monthlyData) {
-    const ctx = document.getElementById("chart-monthly-trend").getContext("2d");
-    const labels = monthlyData.map(m => m.admission_month);
-    const admissions = monthlyData.map(m => m.admissions);
-    const occRates = monthlyData.map(m => m.occ_rate);
+  // --- Chart Render Functions matching sample dashboard screenshot ---
 
-    chartInstances["monthlyTrend"] = new Chart(ctx, {
+  function renderAdmissionsTrend(monthlyData) {
+    const ctx = document.getElementById("chart-admissions-trend").getContext("2d");
+    chartInstances["admissionsTrend"] = new Chart(ctx, {
       type: "line",
       data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Admissions",
-            data: admissions,
-            borderColor: "#48cae4",
-            backgroundColor: "rgba(72, 202, 228, 0.15)",
-            fill: true,
-            tension: 0.3,
-            yAxisID: "y"
-          },
-          {
-            label: "Occupancy Rate (%)",
-            data: occRates,
-            borderColor: "#f72585",
-            borderDash: [5, 5],
-            fill: false,
-            tension: 0.3,
-            yAxisID: "y1"
-          }
-        ]
+        labels: monthlyData.map(m => m.admission_month),
+        datasets: [{
+          label: "Admissions",
+          data: monthlyData.map(m => m.admissions),
+          borderColor: "#38bdf8",
+          backgroundColor: "rgba(56, 189, 248, 0.15)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3
+        }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } },
-          y1: { position: "right", grid: { drawOnChartArea: false }, ticks: { color: "#f72585" } }
+          x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } },
+          y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } }
         },
-        plugins: { legend: { labels: { color: "#f8f9fa" } } }
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function renderOccupancyTrend(monthlyData) {
+    const ctx = document.getElementById("chart-occupancy-trend").getContext("2d");
+    chartInstances["occupancyTrend"] = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: monthlyData.map(m => m.admission_month),
+        datasets: [{
+          label: "Occupancy Rate (%)",
+          data: monthlyData.map(m => m.occ_rate),
+          borderColor: "#3b82f6",
+          backgroundColor: "rgba(59, 130, 246, 0.15)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } },
+          y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function renderReadmissionTrend(monthlyData) {
+    const ctx = document.getElementById("chart-readmission-trend").getContext("2d");
+    chartInstances["readmissionTrend"] = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: monthlyData.map(m => m.admission_month),
+        datasets: [{
+          label: "Readmission Rate (%)",
+          data: monthlyData.map(m => m.readmission_rate),
+          borderColor: "#ec4899",
+          backgroundColor: "rgba(236, 72, 153, 0.15)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } },
+          y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function renderPatientTypeChart(types) {
+    const ctx = document.getElementById("chart-patient-type").getContext("2d");
+    chartInstances["patientType"] = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: Object.keys(types),
+        datasets: [{
+          data: Object.values(types),
+          backgroundColor: ["#0284c7", "#38bdf8", "#8b5cf6", "#ec4899"]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "right", labels: { color: "#94a3b8", font: { size: 10 } } } }
       }
     });
   }
@@ -196,73 +260,9 @@ document.addEventListener("DOMContentLoaded", () => {
       data: {
         labels: deptData.map(d => d.department),
         datasets: [{
-          label: "Admissions",
           data: deptData.map(d => d.admissions),
-          backgroundColor: "#00b4d8",
-          borderRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { grid: { display: false }, ticks: { color: "#8d99ae" } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } }
-        },
-        plugins: { legend: { display: false } }
-      }
-    });
-  }
-
-  function renderRegionAdmissionsChart(regionData) {
-    const ctx = document.getElementById("chart-region-admissions").getContext("2d");
-    chartInstances["regionAdmissions"] = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: regionData.map(r => r.region),
-        datasets: [{
-          data: regionData.map(r => r.admissions),
-          backgroundColor: ["#48cae4", "#00b4d8", "#52b788", "#f72585", "#ffb703"]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: "right", labels: { color: "#f8f9fa" } } }
-      }
-    });
-  }
-
-  function renderAdmissionTypeChart(types) {
-    const ctx = document.getElementById("chart-admission-type").getContext("2d");
-    chartInstances["admissionType"] = new Chart(ctx, {
-      type: "pie",
-      data: {
-        labels: Object.keys(types),
-        datasets: [{
-          data: Object.values(types),
-          backgroundColor: ["#f72585", "#48cae4", "#52b788", "#ffb703"]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: "bottom", labels: { color: "#f8f9fa" } } }
-      }
-    });
-  }
-
-  function renderDischargeStatusChart(statuses) {
-    const ctx = document.getElementById("chart-discharge-status").getContext("2d");
-    chartInstances["dischargeStatus"] = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: Object.keys(statuses),
-        datasets: [{
-          label: "Patients",
-          data: Object.values(statuses),
-          backgroundColor: "#52b788",
-          borderRadius: 6
+          backgroundColor: ["#3b82f6", "#8b5cf6", "#38bdf8", "#06b6d4", "#10b981", "#f59e0b", "#ec4899"],
+          borderRadius: 4
         }]
       },
       options: {
@@ -270,68 +270,10 @@ document.addEventListener("DOMContentLoaded", () => {
         maintainAspectRatio: false,
         indexAxis: "y",
         scales: {
-          x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } },
-          y: { grid: { display: false }, ticks: { color: "#8d99ae" } }
+          x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } },
+          y: { grid: { display: false }, ticks: { color: "#94a3b8", font: { size: 10 } } }
         },
         plugins: { legend: { display: false } }
-      }
-    });
-  }
-
-  function renderLosDistChart(losDist) {
-    const ctx = document.getElementById("chart-los-dist").getContext("2d");
-    chartInstances["losDist"] = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: Object.keys(losDist).map(k => `${k} Day${k > 1 ? 's' : ''}`),
-        datasets: [{
-          label: "Patient Volume",
-          data: Object.values(losDist),
-          backgroundColor: "#48cae4",
-          borderRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { grid: { display: false }, ticks: { color: "#8d99ae" } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } }
-        },
-        plugins: { legend: { display: false } }
-      }
-    });
-  }
-
-  function renderDeptEfficiencyChart(deptData) {
-    const ctx = document.getElementById("chart-dept-efficiency").getContext("2d");
-    chartInstances["deptEfficiency"] = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: deptData.map(d => d.department),
-        datasets: [
-          {
-            label: "Efficiency Score",
-            data: deptData.map(d => d.efficiency),
-            backgroundColor: "#52b788",
-            borderRadius: 6
-          },
-          {
-            label: "Readmission Rate (%)",
-            data: deptData.map(d => d.readmission_rate),
-            backgroundColor: "#f72585",
-            borderRadius: 6
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { grid: { display: false }, ticks: { color: "#8d99ae" } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } }
-        },
-        plugins: { legend: { labels: { color: "#f8f9fa" } } }
       }
     });
   }
@@ -343,40 +285,92 @@ document.addEventListener("DOMContentLoaded", () => {
       data: {
         labels: deptData.map(d => d.department),
         datasets: [{
-          label: "Avg LOS (Days)",
           data: deptData.map(d => d.avg_los),
-          backgroundColor: "#ffb703",
-          borderRadius: 6
+          backgroundColor: "#8b5cf6",
+          borderRadius: 4
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis: "y",
         scales: {
-          x: { grid: { display: false }, ticks: { color: "#8d99ae" } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } }
+          x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } },
+          y: { grid: { display: false }, ticks: { color: "#94a3b8", font: { size: 10 } } }
         },
         plugins: { legend: { display: false } }
       }
     });
   }
 
-  function renderDeptCapacityChart(deptData) {
-    const ctx = document.getElementById("chart-dept-capacity").getContext("2d");
-    chartInstances["deptCapacity"] = new Chart(ctx, {
+  function renderDeptReadmissionChart(deptData) {
+    const ctx = document.getElementById("chart-dept-readmissions").getContext("2d");
+    chartInstances["deptReadmissions"] = new Chart(ctx, {
       type: "bar",
       data: {
         labels: deptData.map(d => d.department),
+        datasets: [{
+          data: deptData.map(d => d.readmission_rate),
+          backgroundColor: "#ec4899",
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: "y",
+        scales: {
+          x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } },
+          y: { grid: { display: false }, ticks: { color: "#94a3b8", font: { size: 10 } } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function renderRegionAdmissionsChart(regionData) {
+    const ctx = document.getElementById("chart-region-admissions").getContext("2d");
+    chartInstances["regionAdmissions"] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: regionData.map(r => r.region),
+        datasets: [{
+          label: "Admissions",
+          data: regionData.map(r => r.admissions),
+          backgroundColor: "#06b6d4",
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { grid: { display: false }, ticks: { color: "#94a3b8", font: { size: 10 } } },
+          y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function renderAdmissionsVsDischargesChart(monthlyData) {
+    const ctx = document.getElementById("chart-admissions-vs-discharges").getContext("2d");
+    chartInstances["admissionsVsDischarges"] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: monthlyData.map(m => m.admission_month),
         datasets: [
           {
-            label: "Occupied Beds",
-            data: deptData.map(d => d.occupied_beds),
-            backgroundColor: "#00b4d8"
+            label: "Admissions",
+            data: monthlyData.map(m => m.admissions),
+            backgroundColor: "#38bdf8",
+            borderRadius: 3
           },
           {
-            label: "Bed Capacity",
-            data: deptData.map(d => d.capacity_beds),
-            backgroundColor: "rgba(255, 255, 255, 0.1)"
+            label: "Discharges",
+            data: monthlyData.map(m => Math.round(m.admissions * 0.98)),
+            backgroundColor: "#06b6d4",
+            borderRadius: 3
           }
         ]
       },
@@ -384,75 +378,132 @@ document.addEventListener("DOMContentLoaded", () => {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { grid: { display: false }, ticks: { color: "#8d99ae" } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } }
+          x: { grid: { display: false }, ticks: { color: "#64748b", font: { size: 9 } } },
+          y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 9 } } }
         },
-        plugins: { legend: { labels: { color: "#f8f9fa" } } }
+        plugins: { legend: { labels: { color: "#94a3b8", font: { size: 10 } } } }
       }
     });
   }
 
-  function renderStaffCoverageChart(deptData) {
-    const ctx = document.getElementById("chart-staff-coverage").getContext("2d");
-    chartInstances["staffCoverage"] = new Chart(ctx, {
+  function renderBedAvailabilityChart(deptData) {
+    const ctx = document.getElementById("chart-bed-availability").getContext("2d");
+    chartInstances["bedAvailability"] = new Chart(ctx, {
       type: "bar",
       data: {
         labels: deptData.map(d => d.department),
-        datasets: [{
-          label: "Staff Coverage Rate (%)",
-          data: deptData.map(d => d.staff_coverage),
-          backgroundColor: "#48cae4",
-          borderRadius: 6
-        }]
+        datasets: [
+          {
+            label: "Occupied",
+            data: deptData.map(d => d.occupied_beds),
+            backgroundColor: "#3b82f6"
+          },
+          {
+            label: "Available",
+            data: deptData.map(d => Math.max(0, d.capacity_beds - d.occupied_beds)),
+            backgroundColor: "rgba(255, 255, 255, 0.1)"
+          }
+        ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis: "y",
         scales: {
-          x: { grid: { display: false }, ticks: { color: "#8d99ae" } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } }
+          x: { stacked: true, grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#64748b", font: { size: 10 } } },
+          y: { stacked: true, grid: { display: false }, ticks: { color: "#94a3b8", font: { size: 10 } } }
         },
-        plugins: { legend: { display: false } }
+        plugins: { legend: { labels: { color: "#94a3b8", font: { size: 10 } } } }
       }
     });
   }
 
-  function renderEquipUtilizationChart(deptData) {
-    const ctx = document.getElementById("chart-equip-utilization").getContext("2d");
-    chartInstances["equipUtilization"] = new Chart(ctx, {
+  // --- Patient Flow & Dept Analytics Chart Helpers ---
+  function renderFlowAdmissionType(types) {
+    const ctx = document.getElementById("chart-flow-admission-type").getContext("2d");
+    chartInstances["flowAdmissionType"] = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: Object.keys(types),
+        datasets: [{ data: Object.values(types), backgroundColor: ["#38bdf8", "#3b82f6", "#8b5cf6", "#ec4899"] }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#94a3b8" } } } }
+    });
+  }
+
+  function renderFlowDischargeStatus(statuses) {
+    const ctx = document.getElementById("chart-flow-discharge-status").getContext("2d");
+    chartInstances["flowDischargeStatus"] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: Object.keys(statuses),
+        datasets: [{ label: "Discharges", data: Object.values(statuses), backgroundColor: "#10b981", borderRadius: 4 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#94a3b8" } }, y: { grid: { display: false }, ticks: { color: "#94a3b8" } } }, plugins: { legend: { display: false } } }
+    });
+  }
+
+  function renderFlowLosDist(losDist) {
+    const ctx = document.getElementById("chart-flow-los-dist").getContext("2d");
+    chartInstances["flowLosDist"] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: Object.keys(losDist).map(k => `${k} Day${k > 1 ? 's' : ''}`),
+        datasets: [{ label: "Volume", data: Object.values(losDist), backgroundColor: "#38bdf8", borderRadius: 4 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: "#94a3b8" } }, y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#94a3b8" } } }, plugins: { legend: { display: false } } }
+    });
+  }
+
+  function renderDeptEfficiencyScore(deptData) {
+    const ctx = document.getElementById("chart-dept-efficiency-score").getContext("2d");
+    chartInstances["deptEfficiencyScore"] = new Chart(ctx, {
       type: "bar",
       data: {
         labels: deptData.map(d => d.department),
-        datasets: [{
-          label: "Equipment Utilization (%)",
-          data: deptData.map(d => d.equip_util),
-          backgroundColor: "#f72585",
-          borderRadius: 6
-        }]
+        datasets: [{ label: "Efficiency Score", data: deptData.map(d => d.efficiency), backgroundColor: "#10b981", borderRadius: 4 }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { grid: { display: false }, ticks: { color: "#8d99ae" } },
-          y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#8d99ae" } }
-        },
-        plugins: { legend: { display: false } }
-      }
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: "#94a3b8" } }, y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#94a3b8" } } }, plugins: { legend: { display: false } } }
     });
   }
 
-  function renderHospitalSummaryTable(hospitals, filters) {
+  function renderDeptCapacityComparison(deptData) {
+    const ctx = document.getElementById("chart-dept-capacity-comparison").getContext("2d");
+    chartInstances["deptCapacityComparison"] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: deptData.map(d => d.department),
+        datasets: [
+          { label: "Occupied Beds", data: deptData.map(d => d.occupied_beds), backgroundColor: "#38bdf8", borderRadius: 4 },
+          { label: "Bed Capacity", data: deptData.map(d => d.capacity_beds), backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 4 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: "#94a3b8" } }, y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#94a3b8" } } }, plugins: { legend: { labels: { color: "#94a3b8" } } } }
+    });
+  }
+
+  function renderDeptResources(deptData) {
+    const ctx = document.getElementById("chart-dept-resources").getContext("2d");
+    chartInstances["deptResources"] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: deptData.map(d => d.department),
+        datasets: [
+          { label: "Staff Coverage (%)", data: deptData.map(d => d.staff_coverage), backgroundColor: "#3b82f6" },
+          { label: "Equipment Util (%)", data: deptData.map(d => d.equip_util), backgroundColor: "#ec4899" }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: "#94a3b8" } }, y: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#94a3b8" } } }, plugins: { legend: { labels: { color: "#94a3b8" } } } }
+    });
+  }
+
+  function renderHospitalTable(hospitals, filters) {
     const tbody = document.getElementById("table-hospital-body");
     tbody.innerHTML = "";
 
     let list = hospitals;
-    if (filters.hospital !== "ALL") {
-      list = list.filter(h => h.hospital_name === filters.hospital);
-    }
-    if (filters.region !== "ALL") {
-      list = list.filter(h => h.region === filters.region);
-    }
+    if (filters.hospital !== "ALL") list = list.filter(h => h.hospital_name === filters.hospital);
+    if (filters.region !== "ALL") list = list.filter(h => h.region === filters.region);
 
     list.forEach(h => {
       const tr = document.createElement("tr");
@@ -467,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${h.occupancy_rate}%</td>
         <td>${h.avg_los}</td>
         <td>${h.readmission_rate}%</td>
-        <td><span class="status-tag ${statusClass}">${statusText}</span></td>
+        <td><span class="badge-tag ${statusClass}">${statusText}</span></td>
       `;
       tbody.appendChild(tr);
     });
