@@ -5,10 +5,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD_DIR = ROOT / "dashboard"
 EXCEL_PATH = ROOT / "data" / "processed" / "hospital_final_dataset.xlsx"
+CSV_PATH = ROOT / "data" / "processed" / "hospital_cleaned.csv"
 TWB_PATH = DASHBOARD_DIR / "medtrack_prototype.twb"
 TWBX_PATH = DASHBOARD_DIR / "medtrack_prototype.twbx"
 
-TWB_XML_CONTENT = """<?xml version='1.0' encoding='utf-8' ?>
+TWB_XML_CONTENT = f"""<?xml version='1.0' encoding='utf-8' ?>
 <workbook original-version='18.1' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
   <document-format-change-manifest>
     <AutoCreateAndUpdateDPIAwareness />
@@ -17,11 +18,10 @@ TWB_XML_CONTENT = """<?xml version='1.0' encoding='utf-8' ?>
   </document-format-change-manifest>
   <preferences>
     <preference name='ui.encoding' value='UTF-8' />
-    <preference name='ui.theme' value='dark' />
   </preferences>
   <datasources>
-    <datasource caption='Final Dataset (hospital_final_dataset)' inline='true' name='excel-direct.hospital_final_dataset' version='18.1'>
-      <connection class='excel-direct' cleaning='no' compat='no' dataReflection='no' filename='Data/hospital_final_dataset.xlsx' password=''>
+    <datasource caption='Final Dataset' inline='true' name='excel-direct.hospital_final_dataset' version='18.1'>
+      <connection class='excel-direct' cleaning='no' compat='no' dataReflection='no' filename='{EXCEL_PATH.as_posix()}' password=''>
         <relation name='Final Dataset' table='[Final Dataset$]' type='table'>
           <columns gridOrigin='A1:AI1501:no:A1:AI1501:0' header='yes' outcome='2'>
             <column name='admission_id' ordinal='0' datatype='string' />
@@ -62,9 +62,7 @@ TWB_XML_CONTENT = """<?xml version='1.0' encoding='utf-8' ?>
           </columns>
         </relation>
       </connection>
-
       <aliases enabled='yes' />
-
       <column caption='Total Admissions' datatype='integer' name='[Calculation_Total_Admissions]' role='measure' type='quantitative'>
         <calculation class='tableau' formula='COUNT([admission_id])' />
       </column>
@@ -77,26 +75,11 @@ TWB_XML_CONTENT = """<?xml version='1.0' encoding='utf-8' ?>
       <column caption='Readmission Rate (%)' datatype='real' name='[Calculation_Readmission_Rate]' role='measure' type='quantitative'>
         <calculation class='tableau' formula='SUM([is_readmission]) / COUNT([admission_id]) * 100' />
       </column>
-      <column caption='Bed Utilization Rate (%)' datatype='real' name='[Calculation_Bed_Utilization]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='SUM([occupied_beds]) / SUM([department_bed_capacity]) * 100' />
-      </column>
-      <column caption='Equipment Utilization Rate (%)' datatype='real' name='[Calculation_Equip_Utilization]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='SUM([equipment_in_use]) / SUM([equipment_available]) * 100' />
-      </column>
-      <column caption='Staff Coverage Rate (%)' datatype='real' name='[Calculation_Staff_Coverage]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='SUM([staff_available]) / SUM([staff_required]) * 100' />
-      </column>
-      <column caption='Department Efficiency Score' datatype='real' name='[Calculation_Dept_Efficiency]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='0.40 * (100 - (SUM([is_readmission]) / COUNT([admission_id]) * 100)) + 0.30 * (SUM([occupied_beds]) / SUM([department_bed_capacity]) * 100) + 0.20 * (SUM([equipment_in_use]) / SUM([equipment_available]) * 100) + 0.10 * MIN((SUM([staff_available]) / SUM([staff_required]) * 100), 100)' />
-      </column>
-      <column caption='Discharge Count' datatype='integer' name='[Calculation_Discharge_Count]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='COUNT([discharge_date])' />
-      </column>
     </datasource>
   </datasources>
 
   <worksheets>
-    <worksheet name='Hospital Overview KPI'>
+    <worksheet name='Hospital Overview Sheet'>
       <table>
         <view>
           <datasources>
@@ -105,14 +88,7 @@ TWB_XML_CONTENT = """<?xml version='1.0' encoding='utf-8' ?>
           <aggregation value='true' />
         </view>
         <style />
-        <panes>
-          <pane selection-relaxation-option='selection-relaxation-allow'>
-            <view>
-              <breakdown value='auto' />
-            </view>
-            <mark class='automatic' />
-          </pane>
-        </panes>
+        <panes><pane><view><breakdown value='auto' /></view><mark class='automatic' /></pane></panes>
         <rows />
         <cols />
       </table>
@@ -167,7 +143,7 @@ TWB_XML_CONTENT = """<?xml version='1.0' encoding='utf-8' ?>
       <size maxheight='768' maxwidth='1366' minheight='768' minwidth='1366' />
       <zones>
         <zone h='100000' id='1' type-static='layout-basic' w='100000' x='0' y='0'>
-          <zone h='98000' id='2' name='Hospital Overview KPI' w='98000' x='1000' y='1000' />
+          <zone h='98000' id='2' name='Hospital Overview Sheet' w='98000' x='1000' y='1000' />
         </zone>
       </zones>
     </dashboard>
@@ -210,13 +186,10 @@ TWB_XML_CONTENT = """<?xml version='1.0' encoding='utf-8' ?>
 
 def create_twbx():
     DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # 1. Save .twb file
     with open(TWB_PATH, "w", encoding="utf-8") as f:
         f.write(TWB_XML_CONTENT)
     print(f"Created {TWB_PATH}")
     
-    # 2. Package into .twbx zip archive
     with zipfile.ZipFile(TWBX_PATH, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         zipf.write(TWB_PATH, arcname="medtrack_prototype.twb")
         if EXCEL_PATH.exists():
