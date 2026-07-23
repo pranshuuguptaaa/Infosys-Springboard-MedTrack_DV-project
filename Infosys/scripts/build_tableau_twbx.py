@@ -85,54 +85,112 @@ TWB_XML_CONTENT = f"""<?xml version='1.0' encoding='utf-8' ?>
           <datasources>
             <datasource caption='Final Dataset' name='excel-direct.hospital_final_dataset' />
           </datasources>
+          <datasource-dependencies datasource='excel-direct.hospital_final_dataset'>
+            <column-instance column='[department]' derivation='None' name='[none:department:nk]' pivot='key' type='nominal' />
+            <column-instance column='[total_admissions]' derivation='Sum' name='[sum:total_admissions:qk]' pivot='key' type='quantitative' />
+            <column datatype='string' name='[department]' role='dimension' type='nominal' />
+            <column datatype='integer' name='[total_admissions]' role='measure' type='quantitative' />
+          </datasource-dependencies>
           <aggregation value='true' />
         </view>
         <style />
-        <panes><pane><view><breakdown value='auto' /></view><mark class='automatic' /></pane></panes>
-        <rows />
-        <cols />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='automatic' />
+            <encodings>
+              <color column='[excel-direct.hospital_final_dataset].[none:department:nk]' />
+            </encodings>
+          </pane>
+        </panes>
+        <rows>[excel-direct.hospital_final_dataset].[sum:total_admissions:qk]</rows>
+        <cols>[excel-direct.hospital_final_dataset].[none:department:nk]</cols>
       </table>
     </worksheet>
+
     <worksheet name='Patient Flow Sheet'>
       <table>
         <view>
           <datasources>
             <datasource caption='Final Dataset' name='excel-direct.hospital_final_dataset' />
           </datasources>
+          <datasource-dependencies datasource='excel-direct.hospital_final_dataset'>
+            <column-instance column='[admission_month]' derivation='None' name='[none:admission_month:nk]' pivot='key' type='nominal' />
+            <column-instance column='[total_admissions]' derivation='Sum' name='[sum:total_admissions:qk]' pivot='key' type='quantitative' />
+            <column datatype='string' name='[admission_month]' role='dimension' type='nominal' />
+            <column datatype='integer' name='[total_admissions]' role='measure' type='quantitative' />
+          </datasource-dependencies>
           <aggregation value='true' />
         </view>
         <style />
-        <panes><pane><view><breakdown value='auto' /></view><mark class='automatic' /></pane></panes>
-        <rows />
-        <cols />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='automatic' />
+          </pane>
+        </panes>
+        <rows>[excel-direct.hospital_final_dataset].[sum:total_admissions:qk]</rows>
+        <cols>[excel-direct.hospital_final_dataset].[none:admission_month:nk]</cols>
       </table>
     </worksheet>
+
     <worksheet name='Department Analytics Sheet'>
       <table>
         <view>
           <datasources>
             <datasource caption='Final Dataset' name='excel-direct.hospital_final_dataset' />
           </datasources>
+          <datasource-dependencies datasource='excel-direct.hospital_final_dataset'>
+            <column-instance column='[department]' derivation='None' name='[none:department:nk]' pivot='key' type='nominal' />
+            <column-instance column='[department_efficiency_score]' derivation='Avg' name='[avg:department_efficiency_score:qk]' pivot='key' type='quantitative' />
+            <column datatype='string' name='[department]' role='dimension' type='nominal' />
+            <column datatype='real' name='[department_efficiency_score]' role='measure' type='quantitative' />
+          </datasource-dependencies>
           <aggregation value='true' />
         </view>
         <style />
-        <panes><pane><view><breakdown value='auto' /></view><mark class='automatic' /></pane></panes>
-        <rows />
-        <cols />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='automatic' />
+          </pane>
+        </panes>
+        <rows>[excel-direct.hospital_final_dataset].[avg:department_efficiency_score:qk]</rows>
+        <cols>[excel-direct.hospital_final_dataset].[none:department:nk]</cols>
       </table>
     </worksheet>
+
     <worksheet name='Resource Utilization Sheet'>
       <table>
         <view>
           <datasources>
             <datasource caption='Final Dataset' name='excel-direct.hospital_final_dataset' />
           </datasources>
+          <datasource-dependencies datasource='excel-direct.hospital_final_dataset'>
+            <column-instance column='[hospital_name]' derivation='None' name='[none:hospital_name:nk]' pivot='key' type='nominal' />
+            <column-instance column='[occupancy_rate]' derivation='Avg' name='[avg:occupancy_rate:qk]' pivot='key' type='quantitative' />
+            <column datatype='string' name='[hospital_name]' role='dimension' type='nominal' />
+            <column datatype='real' name='[occupancy_rate]' role='measure' type='quantitative' />
+          </datasource-dependencies>
           <aggregation value='true' />
         </view>
         <style />
-        <panes><pane><view><breakdown value='auto' /></view><mark class='automatic' /></pane></panes>
-        <rows />
-        <cols />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='automatic' />
+          </pane>
+        </panes>
+        <rows>[excel-direct.hospital_final_dataset].[avg:occupancy_rate:qk]</rows>
+        <cols>[excel-direct.hospital_final_dataset].[none:hospital_name:nk]</cols>
       </table>
     </worksheet>
   </worksheets>
