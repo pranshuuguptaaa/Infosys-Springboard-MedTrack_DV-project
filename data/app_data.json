@@ -1,0 +1,417 @@
+{
+  "summary": {
+    "total_admissions": 1500,
+    "occupancy_rate": 74.83,
+    "avg_los": 4.75,
+    "readmission_rate": 7.4,
+    "bed_utilization_rate": 74.83,
+    "avg_efficiency": 80.97,
+    "total_discharges": 1500
+  },
+  "monthly": [
+    {
+      "admission_month": "2024-01",
+      "admissions": 124,
+      "readmissions": 4,
+      "avg_los": 4.59,
+      "occupied_beds": 3128,
+      "capacity_beds": 4340,
+      "occ_rate": 72.07,
+      "readmission_rate": 3.23
+    },
+    {
+      "admission_month": "2024-02",
+      "admissions": 109,
+      "readmissions": 10,
+      "avg_los": 4.59,
+      "occupied_beds": 3276,
+      "capacity_beds": 4252,
+      "occ_rate": 77.05,
+      "readmission_rate": 9.17
+    },
+    {
+      "admission_month": "2024-03",
+      "admissions": 124,
+      "readmissions": 11,
+      "avg_los": 4.52,
+      "occupied_beds": 3520,
+      "capacity_beds": 4733,
+      "occ_rate": 74.37,
+      "readmission_rate": 8.87
+    },
+    {
+      "admission_month": "2024-04",
+      "admissions": 115,
+      "readmissions": 8,
+      "avg_los": 4.86,
+      "occupied_beds": 3347,
+      "capacity_beds": 4418,
+      "occ_rate": 75.76,
+      "readmission_rate": 6.96
+    },
+    {
+      "admission_month": "2024-05",
+      "admissions": 129,
+      "readmissions": 11,
+      "avg_los": 4.67,
+      "occupied_beds": 3444,
+      "capacity_beds": 4801,
+      "occ_rate": 71.74,
+      "readmission_rate": 8.53
+    },
+    {
+      "admission_month": "2024-06",
+      "admissions": 117,
+      "readmissions": 6,
+      "avg_los": 4.91,
+      "occupied_beds": 3027,
+      "capacity_beds": 4080,
+      "occ_rate": 74.19,
+      "readmission_rate": 5.13
+    },
+    {
+      "admission_month": "2024-07",
+      "admissions": 131,
+      "readmissions": 10,
+      "avg_los": 4.4,
+      "occupied_beds": 3526,
+      "capacity_beds": 4649,
+      "occ_rate": 75.84,
+      "readmission_rate": 7.63
+    },
+    {
+      "admission_month": "2024-08",
+      "admissions": 146,
+      "readmissions": 8,
+      "avg_los": 4.98,
+      "occupied_beds": 4071,
+      "capacity_beds": 5278,
+      "occ_rate": 77.13,
+      "readmission_rate": 5.48
+    },
+    {
+      "admission_month": "2024-09",
+      "admissions": 122,
+      "readmissions": 13,
+      "avg_los": 4.88,
+      "occupied_beds": 3431,
+      "capacity_beds": 4594,
+      "occ_rate": 74.68,
+      "readmission_rate": 10.66
+    },
+    {
+      "admission_month": "2024-10",
+      "admissions": 133,
+      "readmissions": 13,
+      "avg_los": 5.03,
+      "occupied_beds": 3632,
+      "capacity_beds": 4803,
+      "occ_rate": 75.62,
+      "readmission_rate": 9.77
+    },
+    {
+      "admission_month": "2024-11",
+      "admissions": 120,
+      "readmissions": 9,
+      "avg_los": 5.13,
+      "occupied_beds": 3522,
+      "capacity_beds": 4727,
+      "occ_rate": 74.51,
+      "readmission_rate": 7.5
+    },
+    {
+      "admission_month": "2024-12",
+      "admissions": 130,
+      "readmissions": 8,
+      "avg_los": 4.46,
+      "occupied_beds": 3707,
+      "capacity_beds": 4956,
+      "occ_rate": 74.8,
+      "readmission_rate": 6.15
+    }
+  ],
+  "department": [
+    {
+      "department": "Cardiology",
+      "admissions": 201,
+      "readmissions": 15,
+      "avg_los": 4.45,
+      "efficiency": 80.83,
+      "occupied_beds": 5824,
+      "capacity_beds": 7880,
+      "staff_avail": 12.388059701492537,
+      "staff_req": 10.199004975124378,
+      "equip_in_use": 6.144278606965174,
+      "equip_avail": 9.766169154228855,
+      "readmission_rate": 7.46,
+      "occupancy_rate": 73.91,
+      "staff_coverage": 121.46,
+      "equip_util": 62.91
+    },
+    {
+      "department": "Emergency",
+      "admissions": 207,
+      "readmissions": 17,
+      "avg_los": 2.0,
+      "efficiency": 79.43,
+      "occupied_beds": 5434,
+      "capacity_beds": 7510,
+      "staff_avail": 11.27536231884058,
+      "staff_req": 9.371980676328503,
+      "equip_in_use": 5.516908212560386,
+      "equip_avail": 9.043478260869565,
+      "readmission_rate": 8.21,
+      "occupancy_rate": 72.36,
+      "staff_coverage": 120.31,
+      "equip_util": 61.0
+    },
+    {
+      "department": "General Medicine",
+      "admissions": 416,
+      "readmissions": 32,
+      "avg_los": 5.05,
+      "efficiency": 81.45,
+      "occupied_beds": 11797,
+      "capacity_beds": 15332,
+      "staff_avail": 11.5,
+      "staff_req": 10.048076923076923,
+      "equip_in_use": 5.735576923076923,
+      "equip_avail": 9.173076923076923,
+      "readmission_rate": 7.69,
+      "occupancy_rate": 76.94,
+      "staff_coverage": 114.45,
+      "equip_util": 62.53
+    },
+    {
+      "department": "ICU",
+      "admissions": 81,
+      "readmissions": 15,
+      "avg_los": 7.69,
+      "efficiency": 76.32,
+      "occupied_beds": 2183,
+      "capacity_beds": 3008,
+      "staff_avail": 11.654320987654321,
+      "staff_req": 9.444444444444445,
+      "equip_in_use": 5.864197530864198,
+      "equip_avail": 9.234567901234568,
+      "readmission_rate": 18.52,
+      "occupancy_rate": 72.57,
+      "staff_coverage": 123.4,
+      "equip_util": 63.5
+    },
+    {
+      "department": "Orthopedics",
+      "admissions": 162,
+      "readmissions": 11,
+      "avg_los": 5.66,
+      "efficiency": 81.14,
+      "occupied_beds": 4392,
+      "capacity_beds": 5920,
+      "staff_avail": 11.753086419753087,
+      "staff_req": 9.493827160493828,
+      "equip_in_use": 5.432098765432099,
+      "equip_avail": 8.969135802469136,
+      "readmission_rate": 6.79,
+      "occupancy_rate": 74.19,
+      "staff_coverage": 123.8,
+      "equip_util": 60.56
+    },
+    {
+      "department": "Pediatrics",
+      "admissions": 192,
+      "readmissions": 9,
+      "avg_los": 3.67,
+      "efficiency": 82.32,
+      "occupied_beds": 5351,
+      "capacity_beds": 7174,
+      "staff_avail": 12.057291666666666,
+      "staff_req": 9.838541666666666,
+      "equip_in_use": 6.010416666666667,
+      "equip_avail": 9.416666666666666,
+      "readmission_rate": 4.69,
+      "occupancy_rate": 74.59,
+      "staff_coverage": 122.55,
+      "equip_util": 63.83
+    },
+    {
+      "department": "Surgery",
+      "admissions": 241,
+      "readmissions": 12,
+      "avg_los": 6.13,
+      "efficiency": 81.96,
+      "occupied_beds": 6650,
+      "capacity_beds": 8807,
+      "staff_avail": 11.547717842323651,
+      "staff_req": 9.804979253112034,
+      "equip_in_use": 5.742738589211618,
+      "equip_avail": 9.265560165975105,
+      "readmission_rate": 4.98,
+      "occupancy_rate": 75.51,
+      "staff_coverage": 117.77,
+      "equip_util": 61.98
+    }
+  ],
+  "region": [
+    {
+      "region": "Central",
+      "admissions": 290,
+      "readmissions": 20,
+      "occupied_beds": 5430,
+      "capacity_beds": 7490,
+      "occupancy_rate": 72.5,
+      "readmission_rate": 6.9
+    },
+    {
+      "region": "East",
+      "admissions": 281,
+      "readmissions": 24,
+      "occupied_beds": 6376,
+      "capacity_beds": 8664,
+      "occupancy_rate": 73.59,
+      "readmission_rate": 8.54
+    },
+    {
+      "region": "North",
+      "admissions": 283,
+      "readmissions": 26,
+      "occupied_beds": 10204,
+      "capacity_beds": 13612,
+      "occupancy_rate": 74.96,
+      "readmission_rate": 9.19
+    },
+    {
+      "region": "South",
+      "admissions": 335,
+      "readmissions": 19,
+      "occupied_beds": 9806,
+      "capacity_beds": 13063,
+      "occupancy_rate": 75.07,
+      "readmission_rate": 5.67
+    },
+    {
+      "region": "West",
+      "admissions": 311,
+      "readmissions": 22,
+      "occupied_beds": 9815,
+      "capacity_beds": 12802,
+      "occupancy_rate": 76.67,
+      "readmission_rate": 7.07
+    }
+  ],
+  "hospital": [
+    {
+      "hospital_id": "H001",
+      "hospital_name": "CityCare Hospital",
+      "region": "North",
+      "city": "Metro City",
+      "admissions": 283,
+      "readmissions": 26,
+      "avg_los": 4.73,
+      "occupied_beds": 10204,
+      "capacity_beds": 13612,
+      "occupancy_rate": 74.96,
+      "readmission_rate": 9.19
+    },
+    {
+      "hospital_id": "H002",
+      "hospital_name": "Green Valley Hospital",
+      "region": "South",
+      "city": "Lake Town",
+      "admissions": 335,
+      "readmissions": 19,
+      "avg_los": 4.79,
+      "occupied_beds": 9806,
+      "capacity_beds": 13063,
+      "occupancy_rate": 75.07,
+      "readmission_rate": 5.67
+    },
+    {
+      "hospital_id": "H003",
+      "hospital_name": "Sunrise Medical Center",
+      "region": "East",
+      "city": "River City",
+      "admissions": 281,
+      "readmissions": 24,
+      "avg_los": 4.69,
+      "occupied_beds": 6376,
+      "capacity_beds": 8664,
+      "occupancy_rate": 73.59,
+      "readmission_rate": 8.54
+    },
+    {
+      "hospital_id": "H004",
+      "hospital_name": "Metro Health Institute",
+      "region": "West",
+      "city": "Hill View",
+      "admissions": 311,
+      "readmissions": 22,
+      "avg_los": 4.78,
+      "occupied_beds": 9815,
+      "capacity_beds": 12802,
+      "occupancy_rate": 76.67,
+      "readmission_rate": 7.07
+    },
+    {
+      "hospital_id": "H005",
+      "hospital_name": "Hopewell Hospital",
+      "region": "Central",
+      "city": "Capital District",
+      "admissions": 290,
+      "readmissions": 20,
+      "avg_los": 4.76,
+      "occupied_beds": 5430,
+      "capacity_beds": 7490,
+      "occupancy_rate": 72.5,
+      "readmission_rate": 6.9
+    }
+  ],
+  "admission_types": {
+    "Referral": 390,
+    "Emergency": 390,
+    "Outpatient Transfer": 368,
+    "Elective": 352
+  },
+  "discharge_statuses": {
+    "Recovered": 1277,
+    "Transferred": 146,
+    "Against Medical Advice": 53,
+    "Deceased": 24
+  },
+  "los_distribution": {
+    "1": 151,
+    "2": 123,
+    "3": 185,
+    "4": 226,
+    "5": 243,
+    "6": 233,
+    "7": 166,
+    "8": 99,
+    "9": 48,
+    "10": 15,
+    "11": 9,
+    "12": 2
+  },
+  "hospitals_list": [
+    "CityCare Hospital",
+    "Green Valley Hospital",
+    "Hopewell Hospital",
+    "Metro Health Institute",
+    "Sunrise Medical Center"
+  ],
+  "departments_list": [
+    "Cardiology",
+    "Emergency",
+    "General Medicine",
+    "ICU",
+    "Orthopedics",
+    "Pediatrics",
+    "Surgery"
+  ],
+  "regions_list": [
+    "Central",
+    "East",
+    "North",
+    "South",
+    "West"
+  ]
+}
