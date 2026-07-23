@@ -599,9 +599,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    let list = hospitals;
-    if (filters.hospital !== "ALL") list = list.filter(h => h.hospital_name === filters.hospital);
-    if (filters.region !== "ALL") list = list.filter(h => h.region === filters.region);
+    let list = hospitals || [];
+    if (filters && filters.hospital && filters.hospital !== "ALL") {
+      list = list.filter(h => h.hospital_name === filters.hospital);
+    }
+    if (filters && filters.region && filters.region !== "ALL") {
+      list = list.filter(h => h.region === filters.region);
+    }
+
+    if (list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">No matching hospital records found. Click "Reset Filters" to show all data.</td></tr>';
+      return;
+    }
 
     list.forEach(h => {
       const tr = document.createElement("tr");
@@ -612,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><strong>${h.hospital_name}</strong></td>
         <td>${h.region}</td>
         <td>${h.city}</td>
-        <td>${h.admissions}</td>
+        <td>${(h.admissions || 0).toLocaleString()}</td>
         <td>${h.occupancy_rate}%</td>
         <td>${h.avg_los}</td>
         <td>${h.readmission_rate}%</td>
